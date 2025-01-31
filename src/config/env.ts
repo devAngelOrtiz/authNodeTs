@@ -4,7 +4,7 @@ dotenv.config();
 
 const config = {
 	DB: {
-		credential: process.env.AWS_CONNECTION_STRING,
+		credential: process.env.AWS_CONNECTION_STRING || "",
 	},
 	JWT: {
 		secret: process.env.JWT_SECRET ?? "Y3D*1m9B$#Aqz!8Lp^t@hWx+7VfGj&KoR",
