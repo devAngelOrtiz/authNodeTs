@@ -66,6 +66,133 @@ src/
 -   **SignIn**: Inicio de sesión y generación de tokens JWT.
 -   **Logout**: Cierre de sesión e invalidación de tokens.
 
+# Servicios
+
+Todos los endpoints requieren el encabezado user-agent, el cual debe ser una cadena con una longitud mínima de 5 caracteres.
+```json
+{
+  "user-agent": "string (minLength: 5)"
+}
+```
+
+
+## **Sign Up**
+Este servicio permite a un usuario registrarse en el sistema proporcionando su nombre, correo electrónico y contraseña.
+
+### **Endpoint:** `POST api/v2/user`
+
+#### Esquema :
+Entrada (Body)
+```json
+{
+  "name": "string (longitud minima: 5)",
+  "email": "string (formato email)",
+  "password": "string (longitud minima: 8, debe contener al menos una mayúscula y un carácter especial)"
+}
+```
+
+Salida:
+```json
+{
+  "id": "string (UUID)",
+  "name": "string",
+  "email": "string (formato email)",
+  "token": "string",
+  "createdAt": "string (fecha y hora)",
+  "updatedAt": "string (fecha y hora)"
+}
+```
+
+#### Errores:
+statusCode - bodyResponse: Descripcion
+```json
+400 - { msg: "user-agent_required" }: El encabezado user-agent es obligatorio y no se ha proporcionado.
+
+400 - { msg: "name_required" }: El nombre es obligatorio y no se ha proporcionado.
+400 - { msg: "email_required" }: El correo electrónico es obligatorio y no se ha proporcionado.
+400 - { msg: "password_required" }: La contraseña es obligatoria y no se ha proporcionado.
+
+400 - { msg: "user-agent_minLength" }: El encabezado user-agent debe tener al menos 5 caracteres.
+400 - { msg: "password_minLength" }: La contraseña debe tener al menos 8 caracteres.
+400 - { msg: "name_minLength" }: El nombre debe tener al menos 5 caracteres.
+
+400 - { msg: "email_format" }: El formato del correo electrónico no es válido.
+400 - { msg: "password_format" }: El formato de la contraseña no es valido. Debe contener al menos una letra mayúscula y un carácter especial.
+
+400 - { msg: "email_alredyExists" } : Ya existe un usuario registrado con el correo electrónico proporcionado.
+```
+
+##  **Sign In**
+
+Este servicio permite a un usuario iniciar sesión proporcionando su correo electrónico y contraseña.
+
+### **Endpoint:** `POST api/v2/user/log-in`
+
+#### Esquemas
+Entrada (Body):
+```json
+{
+  "email": "string (formato email)",
+  "password": "string (minLength: 8, debe contener al menos una mayúscula y un carácter especial)"
+}
+```
+
+Salida:
+```json
+{
+  "token": "string"
+}
+```
+
+#### Errores:
+statusCode - bodyResponse: Descripcion
+```json
+400 - { msg: "user-agent_required" }: El encabezado user-agent es obligatorio y no se ha proporcionado.
+400 - { msg: "email_required" }: El correo electrónico es obligatorio y no se ha proporcionado.
+400 - { msg: "password_required" }: La contraseña es obligatoria y no se ha proporcionado.
+
+400 - { msg: "user-agent_minLength" }: El encabezado user-agent debe tener al menos 5 caracteres.
+400 - { msg: "password_minLength" }: La contraseña debe tener al menos 8 caracteres.
+
+400 - { msg: "email_format" }: El formato del correo electrónico no es válido.
+400 - { msg: "password_format" }: La contraseña debe contener al menos una letra mayúscula y un carácter especial.
+400 - { msg: "email/password_notFound" }: No se encuentra el usuario por el correo electrónico o la contraseña proporcionada no es válida.
+
+```
+
+##  **Log out**
+
+Este servicio permite a un usuario cerrar sesión.
+
+### **Endpoint:** `DELETE api/v2/user/log-out`
+
+#### Esquemas
+Entrada (Headers):
+```json
+{
+  "authorization": "Bearer {{token}}",
+}
+```
+
+Salida:
+```json
+{
+  "msj": "string"
+}
+```
+
+#### Errores:
+statusCode - bodyResponse: Descripcion
+```json
+400 - { msg: "user-agent_required" }: El encabezado user-agent es obligatorio y no se ha proporcionado.
+
+400 - { msg: "user-agent_minLength" }: El encabezado user-agent debe tener al menos 5 caracteres.
+
+400 - { msg: "session_invalid" } : No se encuentra la sesión o el `user-agent` de la sesión no coincide con el `user-agent proporcionado.
+
+401 - { msg: "token_invalid" }: El token de autenticación es inválido o ha expirado.
+```
+
 ## Cómo Ejecutar
 
 1. Clona el Repositorio:
