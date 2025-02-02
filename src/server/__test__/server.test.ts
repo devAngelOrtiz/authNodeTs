@@ -1,24 +1,11 @@
-import request from "supertest";
-import { app, startServer } from "../server/server";
-import { SERVER } from "../config/env";
-import { jest } from "@jest/globals";
+import { SERVER } from "../../config/env.js";
+import TestAgent from "supertest/lib/agent.js";
 
-jest.mock("../server/server", () => ({
-	startServer: jest.fn(), 
-}));
+const requestServer:TestAgent = (global as any).test.requestServer
 
 describe("API Middlewares", () => {
-	afterAll(async () => {
-		await app.close();
-	});
-
-	beforeAll(async () => {
-		startServer()
-		await app.ready();
-	});
-
-	test("Helmet should include security headers", async () => {
-		const response = await request(app.server).get("/");
+	it("Helmet should include security headers", async () => {
+		const response = await requestServer.get("/api/v1/").set("x-forwarded-for", "192.168.0.1");
 
 		expect(response.headers).toHaveProperty("x-dns-prefetch-control");
 		expect(response.headers["x-dns-prefetch-control"]).toBe("off");
@@ -30,12 +17,12 @@ describe("API Middlewares", () => {
 		expect(response.headers["x-frame-options"]).toBe("SAMEORIGIN");
 	});
 
-	test("RateLimit whithin the limit", async () => {
+	it("RateLimit whithin the limit", async () => {
 		const allRequest: any[] = [];
 		for (let i = 0; i < SERVER.rate.max; i++) {
-			allRequest.push(request(app.server).get("/").set("x-forwarded-for", "192.168.0.2"));
-			//let response = await request(app.server).get("/").set("x-forwarded-for", "192.168.0.2");
-			//expect(response.statusCode).toBe(200);
+			allRequest.push(
+				requestServer.get("/api/v1/").set("x-forwarded-for", "192.168.0.2")
+			);
 		}
 
 		const responses = await Promise.all(allRequest);
@@ -45,12 +32,12 @@ describe("API Middlewares", () => {
 		}
 	});
 
-	test("RateLimit exceed the limit", async () => {
+	it("RateLimit exceed the limit", async () => {
 		const allRequest: any[] = [];
 		for (let i = 0; i < SERVER.rate.max; i++) {
-			allRequest.push(request(app.server).get("/").set("x-forwarded-for", "192.168.0.3"));
-			//let response = await request(app.server).get("/").set("x-forwarded-for", "192.168.0.3");
-			//expect(response.statusCode).toBe(200);
+			allRequest.push(
+				requestServer.get("/api/v1/").set("x-forwarded-for", "192.168.0.3")
+			);
 		}
 
 		const responses = await Promise.all(allRequest);
@@ -59,15 +46,15 @@ describe("API Middlewares", () => {
 			expect(response.statusCode).toBe(200);
 		}
 
-		const failRequest = await request(app.server)
-			.get("/")
+		const failRequest = await requestServer
+			.get("/api/v1/")
 			.set("x-forwarded-for", "192.168.0.3");
 
 		expect(failRequest.status).toBe(429);
 		expect(failRequest.body).toHaveProperty("msg", "Too Many Requests");
 	});
 
-	//test("Fastify inject", async () => {
+	//it("Fastify inject", async () => {
 	//	const response = await app.inject({
 	//		method: "get",
 	//		url: "/",
