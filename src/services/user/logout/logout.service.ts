@@ -5,7 +5,7 @@ import { JWT } from "../../../config/env.js";
 import { SessionRepository } from "../../session/session.repository.js";
 import { Session } from "../../session/session.model.js";
 
-export class SignUpService {
+export class LogOutService {
 	private userRepository: UserRepository;
 	private sessionRepository: SessionRepository;
 
@@ -14,18 +14,14 @@ export class SignUpService {
 		this.sessionRepository = new SessionRepository();
 	}
 
-	async registerUser(userData: IUser, agent: string = "", sign: Function) {
-		const alreadyExistUser = await this.userRepository.findByEmail(userData.email);
+	async logOut(sessionId: string, agent:string = "") {
 
-		if (alreadyExistUser)
-			throw { statusCode: 400, message: "email_alredyExists" } as FastifyError;
+		const session: Session|null = await this.sessionRepository.findById(sessionId);
 
-		const user:User = await this.userRepository.create(userData);
+		if(!session || session.get('userAgent') != agent) throw { statusCode: 400, message: "session_invalid" } as FastifyError;
 
-		const session:Session =  await this.sessionRepository.findOrCreate(user.get('id'), agent);
+		await session.destroy()
 
-		user.setDataValue("token", await sign(user.get("id"), session.get("id")));
-
-		return user;
+		return;
 	}
 }

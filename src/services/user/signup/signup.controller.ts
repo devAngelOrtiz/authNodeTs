@@ -6,12 +6,16 @@ export class SignUpController {
 	private signUpService: SignUpService;
 
 	constructor() {
-		this.signUpService = new SignUpService(  );
+		this.signUpService = new SignUpService();
 	}
 
 	async signUp(request: FastifyRequest<{ Body: IUser }>, reply: FastifyReply) {
-			const user = await this.signUpService.registerUser(request.body, request.headers["user-agent"], request.server.jwt.sign);
+		const user = await this.signUpService.registerUser(
+			request.body,
+			request.headers["user-agent"],
+			request.server.signUser
+		);
 
-			reply.status(201).send(user);
+		reply.status(201).send(user);
 	}
 }

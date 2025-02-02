@@ -4,7 +4,7 @@
 	"description": "Prueba tecnica para Konfio ",
 	"main": "dist/app.js",
 	"scripts": {
-		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles",
 		"build": "tsc",
 		"dev": "nodemon",
 		"secret": "node ./scripts/jwt_secret.js"

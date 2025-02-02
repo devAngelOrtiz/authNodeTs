@@ -8,6 +8,12 @@ export interface IUser {
 	name: string;
 } 
 
+export interface IUserDecoded {
+	sessionId: string;
+	userId: string;
+} 
+
+
 
 export class User extends Model {
 	public id!: string;
@@ -19,7 +25,7 @@ export class User extends Model {
 	public readonly updatedAt!: Date;
 
 	public async validatePassword(password: string): Promise<boolean> {
-		return await bcrypt.compare(password, this.dataValues.password);
+		return await bcrypt.compare(password, this.get('password'));
 	}
 }
 
@@ -53,19 +59,19 @@ User.init(
 		timestamps: true,
 		hooks: {
 			beforeCreate: async function (user) {
-				user.dataValues.password = await bcrypt.hash(user.dataValues.password, 10);
+				user.set('password', await bcrypt.hash(user.get('password'), 10)) 
 			},
 			beforeUpdate: async function (user) {
 				if (user.changed("password")) {
-					user.dataValues.password = await bcrypt.hash(user.dataValues.password, 10);
+					user.set('password',  await bcrypt.hash(user.get('password'), 10))
 				}
 			},
 		},
-		defaultScope: {
-			attributes: {
-				exclude: ['password']
-			},
-		}
+		//defaultScope: {
+		//	attributes: {
+		//		exclude: ['password']
+		//	},
+		//}
 	}
 );
 
