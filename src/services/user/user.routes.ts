@@ -40,13 +40,18 @@ const userRoutes: FastifyPluginAsync = async (
 	server.post(
 		"/sign-in",
 		{
+			//config: {
+			//	rateLimit: {
+			//		max: 3,
+			//		timeWindow: "1 minute",
+			//	},
+			//},
 			schema: {
 				headers: userAgentHeaders,
 				body: singInInputSchema,
 				response: {
 					201: signInOutputSchema,
 				},
-				
 			},
 		},
 		async (req: FastifyRequest<{ Body: IUser }>, reply: FastifyReply) =>
