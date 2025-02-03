@@ -4,10 +4,14 @@
 	"description": "Prueba tecnica para Konfio ",
 	"main": "dist/app.js",
 	"scripts": {
-		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles",
+		"secret": "node ./scripts/jwt_secret.js",
 		"build": "tsc",
-		"dev": "nodemon",
-		"secret": "node ./scripts/jwt_secret.js"
+		"dev": "node --watch --loader ts-node/esm ./src/app.ts",
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles",
+		"db:seed": "npx sequelize-cli db:seed:all  --config=config/config.cjs",
+		"db:seed:undo": "npx sequelize-cli db:seed:undo:all --config=config/config.cjs",
+		"db:migrate": "npx sequelize-cli db:migrate --config=config/config.cjs",
+		"db:migrate:undo": "npx sequelize-cli db:migrate:undo:all --config=config/config.cjs"
 	},
 	"type": "module",
 	"author": "Angel Ortiz Olivera",

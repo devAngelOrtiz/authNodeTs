@@ -41,5 +41,4 @@ Session.init(
 );
 
 Session.belongsTo(User, { foreignKey: "userId" });
-
-//(async () => await sequelize.sync({ alter: true }))();
+ 
