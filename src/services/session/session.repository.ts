@@ -13,7 +13,7 @@ export class SessionRepository {
 		return await Session.create({ userId: userId, userAgent });
 	}
 
-	async findById(id: string): Promise<Session | null> {
+	async findById(id: number): Promise<Session | null> {
 		const session = await Session.findOne({ where: { id } });
 		return session;
 	}

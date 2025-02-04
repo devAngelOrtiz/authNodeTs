@@ -1,44 +1,51 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Sequelize } from "sequelize";
 import { User } from "../user/user.model.js";
-import { sequelize } from "../../config/db.js";
+import { modelsMap } from "../../utils/util.js";
 
 export class Session extends Model {
-	public id!: number;
-	public userId!: string;
-	public userAgent!: string;
-	//public expiresAt!: Date;
+	declare id: number;
+	declare userId: string;
+	declare userAgent: string;
+	//declare expiresAt: Date;
+	declare readonly createdAt: Date;
+	declare readonly updatedAt: Date;
 }
 
-Session.init(
-	{
-		id: {
-			type: DataTypes.INTEGER,
-			autoIncrement: true,
-			primaryKey: true,
-		},
-		userId: {
-			type: DataTypes.UUID,
-			allowNull: false,
-			references: {
-				model: User,
-				key: "id",
-			},
-		},
-		userAgent: {
-			type: DataTypes.STRING,
-			allowNull: false,
-		},
-		//expiresAt: {
-		//	type: DataTypes.DATE,
-		//	allowNull: true,
-		//},
-	},
-	{
-		sequelize,
-		modelName: "Session",
-		timestamps: true,
-	}
-);
+modelsMap["session"] = Session;
 
-Session.belongsTo(User, { foreignKey: "userId" });
- 
+export function init(sequelize: Sequelize) {
+	Session.init(
+		{
+			id: {
+				type: DataTypes.INTEGER,
+				autoIncrement: true,
+				primaryKey: true,
+			},
+			userId: {
+				type: DataTypes.UUID,
+				allowNull: false,
+				references: {
+					model: User,
+					key: "id",
+				},
+			},
+			userAgent: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			//expiresAt: {
+			//	type: DataTypes.DATE,
+			//	allowNull: true,
+			//},
+		},
+		{
+			sequelize,
+			modelName: "Session",
+			timestamps: true,
+		}
+	);
+}
+
+export function assoc() {
+	Session.belongsTo(User, { foreignKey: "userId" });
+}

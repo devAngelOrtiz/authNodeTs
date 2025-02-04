@@ -1,22 +1,9 @@
-export const userAgentHeaders = {
-	type: "object",
-	required: ["user-agent"],
-	properties: {
-		"user-agent": { type: "string", minLength: 5, errorMessage: "user-agent_minLength" },
-	},
-	errorMessage: {
-		required: {
-			"user-agent": "user-agent_required",
-		},
-	},
-	additionalProperties: true,
-} as const;
-
 export const userInputSchema = {
 	type: "object",
-	required: ["name", "email", "password"],
+	required: ["name", "email", "password", "roleId"],
 	properties: {
 		name: { type: "string", minLength: 5, errorMessage: "name_minLength" },
+		roleId: { type: "integer"},
 		email: { type: "string", format: "email", errorMessage: "email_format" },
 		password: {
 			type: "string",
@@ -33,6 +20,7 @@ export const userInputSchema = {
 			name: "name_required",
 			email: "email_required",
 			password: "password_required",
+			roleId: "roleId_required",
 		},
 	},
 	additionalProperties: false,
@@ -45,6 +33,7 @@ export const userOutputSchema = {
 		name: { type: "string" },
 		email: { type: "string", format: "email" },
 		token: { type: "string" },
+		roleId: { type: "integer" },
 		createdAt: { type: "string", format: "date-time" },
 		updatedAt: { type: "string", format: "date-time" },
 	},

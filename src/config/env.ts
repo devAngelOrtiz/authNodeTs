@@ -5,9 +5,11 @@ dotenv.config();
 const config = {
 	DB: {
 		credential: process.env.AWS_CONNECTION_STRING || "",
+		logging: Number(process.env.DB_LOGGING) || false,
+
 	},
 	JWT: {
-		secret: process.env.JWT_SECRET ?? "Y3D*1m9B$#Aqz!8Lp^t@hWx+7VfGj&KoR",
+		secret: process.env.JWT_SECRET ?? "cc29fdb08061cd1158af44f2420bafb8b58a71a4b658dd2e90965772c0a38ada",
 		expires: process.env.JWT_EXPIRES ?? "1d",
 	},
 	SERVER: {

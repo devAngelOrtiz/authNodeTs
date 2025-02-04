@@ -9,8 +9,8 @@ import { SignUpController } from "./signup/signup.controller.js";
 import { SignInController } from "./signin/signin.controller.js";
 import { LogOutController } from "./logout/logout.controller.js";
 
-import { userInputSchema, userOutputSchema, userAgentHeaders } from "./signup/signup.schema.js";
-import { IUser } from "src/services/user/user.model.js";
+import { userInputSchema, userOutputSchema } from "./signup/signup.schema.js";
+import { IUserBody } from "src/services/user/user.model.js";
 import { singInInputSchema } from "./signin/signin.schema.js";
 import { signInOutputSchema } from "./signin/signin.schema.js";
 
@@ -26,14 +26,14 @@ const userRoutes: FastifyPluginAsync = async (
 		"/",
 		{
 			schema: {
-				headers: userAgentHeaders,
+				headers: server.agentSchema,
 				body: userInputSchema,
 				response: {
 					201: userOutputSchema,
 				},
 			},
 		},
-		async (req: FastifyRequest<{ Body: IUser }>, reply: FastifyReply) =>
+		async (req: FastifyRequest<{ Body: IUserBody }>, reply: FastifyReply) =>
 			signUpController.signUp(req, reply)
 	);
 
@@ -47,14 +47,14 @@ const userRoutes: FastifyPluginAsync = async (
 			//	},
 			//},
 			schema: {
-				headers: userAgentHeaders,
+				headers:server.agentSchema,
 				body: singInInputSchema,
 				response: {
 					201: signInOutputSchema,
 				},
 			},
 		},
-		async (req: FastifyRequest<{ Body: IUser }>, reply: FastifyReply) =>
+		async (req: FastifyRequest<{ Body: IUserBody }>, reply: FastifyReply) =>
 			signInController.signIn(req, reply)
 	);
 
@@ -63,7 +63,7 @@ const userRoutes: FastifyPluginAsync = async (
 		{
 			preHandler: [server.authByToken],
 			schema: {
-				headers: userAgentHeaders,
+				headers:server.agentSchema,
 				response: {
 					201: {
 						msg: "Log out",
@@ -71,7 +71,7 @@ const userRoutes: FastifyPluginAsync = async (
 				},
 			},
 		},
-		async (req: FastifyRequest<{ Body: IUser }>, reply: FastifyReply) =>
+		async (req: FastifyRequest<{ Body: IUserBody }>, reply: FastifyReply) =>
 			logOutController.logOut(req, reply)
 	);
 };

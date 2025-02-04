@@ -1,5 +1,5 @@
-import { FastifyError, FastifyReply } from "fastify";
-import { IUser, User } from "../user.model.js";
+import { FastifyError, FastifyInstance, FastifyReply } from "fastify";
+import { IUserBody, User } from "../user.model.js";
 import { UserRepository } from "../user.repository.js";
 import { SessionRepository } from "../../session/session.repository.js";
 import { Session } from "../../session/session.model.js";
@@ -13,7 +13,7 @@ export class SignInService {
 		this.sessionRepository = new SessionRepository();
 	}
 
-	async singIn(userData: IUser, agent: string = "", sign: Function) {
+	async singIn(userData: IUserBody, agent: string = "", server: FastifyInstance) {
 		const user: User | null = await this.userRepository.findByEmail(userData.email);
 
 		if (!user) throw { statusCode: 400, message: "email/password_notFound" } as FastifyError;
@@ -25,7 +25,7 @@ export class SignInService {
 
 		const session: Session = await this.sessionRepository.findOrCreate(user.get("id"), agent);
 
-		user.setDataValue("token", await sign(user.get("id"), session.get("id")));
+		user.setDataValue("token", await server.signUser(user.get("id"), session.get("id")));
 
 		return user;
 	}
