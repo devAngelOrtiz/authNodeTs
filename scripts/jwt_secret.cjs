@@ -1,3 +1,4 @@
+
 const crypto = require('crypto');
 
 // Generar un secret seguro de 256 bits (32 bytes)
