@@ -3,6 +3,7 @@ import { IUserBody, User } from "../user.model.js";
 import { UserRepository } from "../user.repository.js";
 import { SessionRepository } from "../../session/session.repository.js";
 import { Session } from "../../session/session.model.js";
+import { createError } from "../../../utils/util.js";
 
 export class SignInService {
 	private userRepository: UserRepository;
@@ -16,12 +17,11 @@ export class SignInService {
 	async singIn(userData: IUserBody, agent: string = "", server: FastifyInstance) {
 		const user: User | null = await this.userRepository.findByEmail(userData.email);
 
-		if (!user) throw { statusCode: 400, message: "email/password_notFound" } as FastifyError;
+		if (!user) throw createError(400, "email/password_notFound");
 
 		const isValidPass: Boolean = await user.validatePassword(userData.password);
 
-		if (!isValidPass)
-			throw { statusCode: 400, message: "email/password_notFound" } as FastifyError;
+		if (!isValidPass) throw createError(400, "email/password_notFound");
 
 		const session: Session = await this.sessionRepository.findOrCreate(user.get("id"), agent);
 

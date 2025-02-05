@@ -4,11 +4,11 @@ import { FastifyBaseLogger } from "fastify";
 import { init as initUser, assoc as assocUser } from "../services/user/user.model.js";
 import { init as initSession, assoc as assocSession } from "../services/session/session.model.js";
 import { init as initRole, assoc as assocRole } from "../services/role/role.model.js";
-import { init as initRolePermission } from "../services/role/rolepermission.model.js";
+import { init as initRolePermission } from "../services/permission/rolepermission.model.js";
 import {
 	init as initPermission,
 	assoc as assocPermission,
-} from "../services/role/permission.model.js";
+} from "../services/permission/permission.model.js";
 
 const sequelize = new Sequelize(DB.credential, {dialect:"postgres",logging: DB.logging } as Options);
 

@@ -33,19 +33,16 @@ src/
 │   ├── user/
 │   │   ├── logout/
 │   │   │   ├── logout.controller.ts
-│   │   │   ├── logout.repository.ts
 │   │   │   └── logout.service.ts
 │   │   │
 │   │   ├── signin/
 │   │   │   ├── signin.controller.ts
-│   │   │   ├── signin.repository.ts
 │   │   │   ├── signin.schema.ts
 │   │   │   └── signin.service.ts
 │   │   │
 │   │   ├── signup/
 │   │   │   ├── __test__/
 │   │   │   ├── signup.controller.ts
-│   │   │   ├── signup.repository.ts
 │   │   │   ├── signup.schema.ts
 │   │   │   └── signup.service.ts
 │   │   │

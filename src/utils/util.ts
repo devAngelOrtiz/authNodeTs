@@ -18,4 +18,8 @@ export function buildIncludes(modelNames?: string[]) {
 
 export const modelsMap: Record<string, any> = {};
 
+export function createError(statusCode?: number, message?: string): FastifyError {
+	return { statusCode, message } as FastifyError;
+}
+
 export type CRUD = "C" | "R" | "U" | "D";

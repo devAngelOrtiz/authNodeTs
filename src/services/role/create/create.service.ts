@@ -1,6 +1,6 @@
-import { FastifyError } from "fastify";
 import { RoleRepository } from "../role.repository.js";
 import { sequelize } from "../../../config/db.js";
+import { createError } from "../../../utils/util.js";
 
 export class RoleService {
 	private roleRepository: RoleRepository;
@@ -15,9 +15,7 @@ export class RoleService {
 		try {
 			const alreadyExistRole = await this.roleRepository.getByCode(body.code);
 
-			if (alreadyExistRole) {
-				throw { statusCode: 400, message: "code_alredyExists" } as FastifyError;
-			}
+			if (alreadyExistRole) throw createError(400, "code_alredyExists");
 
 			const role = await this.roleRepository.create(body, transaction);
 

@@ -14,8 +14,9 @@ export interface IUserBody {
 export interface IUserDecoded {
 	sessionId: number;
 	userId: string;
-	roleId: number;
+	//roleId: number;
 	session: Session;
+	user: User
 }
 
 export class User extends Model {

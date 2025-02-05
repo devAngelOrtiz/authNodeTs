@@ -17,4 +17,10 @@ export class SessionRepository {
 		const session = await Session.findOne({ where: { id } });
 		return session;
 	}
+
+	async destroyOldSessions(userId: string): Promise<undefined> {
+		const sessions = await Session.destroy({ where: { userId } });
+		
+		return;
+	}
 }

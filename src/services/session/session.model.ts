@@ -2,6 +2,8 @@ import { DataTypes, Model, Sequelize } from "sequelize";
 import { User } from "../user/user.model.js";
 import { modelsMap } from "../../utils/util.js";
 
+export const agentSession = "UserAgentForRecoveryPassword"
+
 export class Session extends Model {
 	declare id: number;
 	declare userId: string;

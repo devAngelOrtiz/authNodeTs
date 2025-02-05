@@ -7,11 +7,21 @@ import fastifyRequestLogger from "@mgcrea/fastify-request-logger";
 import helmet from "@fastify/helmet";
 import jwt from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
+import { createTransport, Transporter } from "nodemailer";
 
 import allRoutes from "./routes.js";
 import { connectDB } from "../config/db.js";
-import { SERVER, JWT } from "../config/env.js";
-import { authByToken, checkPermission, customErrorHandler, signUser, userAgentHeaders } from "./custom.middleware.js";
+import { SERVER, JWT, EMAIL } from "../config/env.js";
+import {
+	authByToken,
+	checkPermission,
+	customErrorHandler,
+	customErrorLogins,
+	recoveryByToken,
+	signUser,
+	statusEndSchema,
+	userAgentHeaders,
+} from "./custom.middleware.js";
 import { IUserDecoded } from "../services/user/user.model.js";
 import { Session } from "../services/session/session.model.js";
 
@@ -62,9 +72,12 @@ await app.register(rateLimit, {
 declare module "fastify" {
 	export interface FastifyInstance {
 		authByToken: any;
+		recoveryByToken: any;
 		signUser: any;
 		checkPermission: any;
-		agentSchema:any
+		agentSchema: any;
+		statusEndSchema: any;
+		nodemailer: Transporter;
 	}
 	export interface FastifyRequest {
 		userDecoded: IUserDecoded;
@@ -73,13 +86,29 @@ declare module "fastify" {
 }
 app.decorate("checkPermission", checkPermission);
 app.decorate("authByToken", authByToken);
+app.decorate("recoveryByToken", recoveryByToken);
 app.decorate("agentSchema", userAgentHeaders);
+app.decorate("statusEndSchema", statusEndSchema);
 
+//email
+app.decorate(
+	"nodemailer",
+	createTransport({
+		service: "gmail",
+		auth: {
+			type: "OAuth2",
+			user: EMAIL.user,
+			clientId: EMAIL.client,
+			clientSecret: EMAIL.secret,
+			refreshToken: EMAIL.refreshToken,
+		},
+	})
+);
 
 //auth
 app.register(jwt, {
 	secret: JWT.secret,
-	sign: { expiresIn: JWT.expires },
+	messages: customErrorLogins,
 });
 app.decorate("signUser", signUser);
 

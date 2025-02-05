@@ -1,10 +1,11 @@
 import { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Session } from "../services/session/session.model.js";
+import { agentSession, Session } from "../services/session/session.model.js";
 import { SessionRepository } from "../services/session/session.repository.js";
 import { UserRepository } from "../services/user/user.repository.js";
 import { RoleRepository } from "../services/role/role.repository.js";
-import { CRUD } from "src/utils/util.js";
-import { getErrorsMessage } from "../utils/util.js";
+import { getErrorsMessage, CRUD, createError } from "../utils/util.js";
+import { JWT } from "../config/env.js";
+import { IUserDecoded, User } from "src/services/user/user.model.js";
 
 const roleRepository = new RoleRepository();
 const permissionMap = {
@@ -17,52 +18,87 @@ const permissionMap = {
 export function checkPermission(module: string, checkPermision: CRUD) {
 	let moduleId: number;
 	roleRepository.findPermission(module).then((role) => {
-		if (!role) throw { message: `${module}_permission_notFound` } as FastifyError;
+		if (!role) throw createError(undefined,`${module}_permission_notFound`)
 		moduleId = role.get("id");
 	});
 
 	return async function (req: FastifyRequest, reply: FastifyReply) {
 		const permission = await roleRepository.findRolePermission(
-			req.userDecoded.roleId,
+			req.userDecoded.user.roleId,
 			moduleId
 		);
 
 		if (!permission || !permission.crud[permissionMap[checkPermision]]) {
-			throw { statusCode: 403, message: "forbidden_access" } as FastifyError;
+			throw createError(403,"forbidden_access")
 		}
 	};
 }
 
-export async function signUser(this: FastifyInstance, userId: string, sessionId: string) {
-	return await this.jwt.sign({
-		userId: userId,
-		sessionId: sessionId,
-	});
+export async function signUser(
+	this: FastifyInstance,
+	userId: string,
+	sessionId: string,
+	expiresIn?: string
+) {
+	return await this.jwt.sign(
+		{
+			userId: userId,
+			sessionId: sessionId,
+		},
+		{ expiresIn: expiresIn ?? JWT.expires }
+	);
 }
 
 const sessionRepository = new SessionRepository();
 const userRepository = new UserRepository();
 
+async function getUserAndSession(userDecoded: IUserDecoded) {
+	const user: User | null = await userRepository.findById(userDecoded.userId);
+
+	if (!user) throw  createError(400,"token_invalid")
+
+	const session: Session | null = await sessionRepository.findById(userDecoded.sessionId);
+
+	if (!session) throw createError(400,"session_invalid")
+
+	return { user, session };
+}
+
+export const customErrorLogins = {
+	badRequestErrorMessage: "token_badFormat",
+	noAuthorizationInHeaderMessage: "token_required",
+	authorizationTokenExpiredMessage: "token_expired",
+	//authorizationTokenUntrusted: 'Untrusted authorization token',
+	//authorizationTokenUnsigned: 'Unsigned authorization token'
+};
+
 export async function authByToken(req: FastifyRequest, reply: FastifyReply) {
-	const token = req.headers.authorization;
-
-	if (!token) throw { statusCode: 401, message: "token_required" } as FastifyError;
-
 	req.userDecoded = await req.jwtVerify();
 
-	const user = await userRepository.findById(req.userDecoded.userId);
-
-	if (!user) {
-		throw { statusCode: 400, message: "token_invalid" } as FastifyError;
+	const { user, session } = await getUserAndSession(req.userDecoded);
+	
+	if (
+		session.get("userAgent") != req.headers["user-agent"] ||
+		session.get("userAgent") == agentSession
+	) {
+		
+		throw createError(400,"session_invalid")
 	}
 
-	const session: Session | null = await sessionRepository.findById(req.userDecoded.sessionId);
+	req.userDecoded.session = session;
+	req.userDecoded.user = user;
 
-	if (!session || session.get("userAgent") != req.headers["user-agent"])
-		throw { statusCode: 400, message: "session_invalid" } as FastifyError;
+}
+
+export async function recoveryByToken(req: FastifyRequest, reply: FastifyReply) {
+	req.userDecoded = await req.jwtVerify();
+
+	const { user, session } = await getUserAndSession(req.userDecoded);
+
+	if (session.get("userAgent") != agentSession) throw createError(400, "session_invalid");
 
 	req.userDecoded.session = session;
-	req.userDecoded.roleId = user.roleId;
+	req.userDecoded.user = user;
 }
 
 export function customErrorHandler(
@@ -94,3 +130,12 @@ export const userAgentHeaders = {
 	},
 	additionalProperties: true,
 } as const;
+
+
+export const statusEndSchema = {
+	type: "object",
+	properties: {
+	  msg: { type: "string" }
+	},
+	additionalProperties: false
+  };

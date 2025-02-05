@@ -1,6 +1,6 @@
 import { Role } from "./role.model.js";
-import { RolePermission } from "./rolepermission.model.js";
-import { Permission } from "./permission.model.js";
+import { RolePermission } from "../permission/rolepermission.model.js";
+import { Permission } from "../permission/permission.model.js";
 import { Transaction } from "sequelize";
 
 export class RoleRepository {

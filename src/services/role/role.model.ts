@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
-import { Permission } from "./permission.model.js";
-import { RolePermission } from "./rolepermission.model.js";
+import { Permission } from "../permission/permission.model.js";
+import { RolePermission } from "../permission/rolepermission.model.js";
 import { User } from "../user/user.model.js";
 import { modelsMap } from "../../utils/util.js";
 

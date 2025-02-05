@@ -1,6 +1,6 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
-import { RolePermission } from "./rolepermission.model.js";
-import { Role } from "./role.model.js";
+import { RolePermission } from "../permission/rolepermission.model.js";
+import { Role } from "../role/role.model.js";
 import { modelsMap } from "../../utils/util.js";
 
 export class Permission extends Model {

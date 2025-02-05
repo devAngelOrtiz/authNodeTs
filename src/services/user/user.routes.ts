@@ -13,10 +13,13 @@ import { userInputSchema, userOutputSchema } from "./signup/signup.schema.js";
 import { IUserBody } from "src/services/user/user.model.js";
 import { singInInputSchema } from "./signin/signin.schema.js";
 import { signInOutputSchema } from "./signin/signin.schema.js";
+import { newPasswordInputSchema, recoveryInputSchema } from "./recovery/recovery.schema.js";
+import { RecoveryController } from "./recovery/recovery.controller.js";
 
 const signUpController: SignUpController = new SignUpController();
 const signInController: SignInController = new SignInController();
 const logOutController: LogOutController = new LogOutController();
+const recoveryController: RecoveryController = new RecoveryController();
 
 const userRoutes: FastifyPluginAsync = async (
 	server: FastifyInstance,
@@ -47,7 +50,7 @@ const userRoutes: FastifyPluginAsync = async (
 			//	},
 			//},
 			schema: {
-				headers:server.agentSchema,
+				headers: server.agentSchema,
 				body: singInInputSchema,
 				response: {
 					201: signInOutputSchema,
@@ -58,16 +61,45 @@ const userRoutes: FastifyPluginAsync = async (
 			signInController.signIn(req, reply)
 	);
 
+	server.post(
+		"/recovery",
+		{
+			schema: {
+				headers: server.agentSchema,
+				body: recoveryInputSchema,
+				response: {
+					201: server.statusEndSchema,
+				},
+			},
+		},
+		async (req: FastifyRequest<{ Body: IUserBody }>, reply: FastifyReply) =>
+			recoveryController.recovery(req, reply)
+	);
+
+	server.put(
+		"/new-password",
+		{
+			preHandler: [server.recoveryByToken],
+			schema: {
+				headers: server.agentSchema,
+				body: newPasswordInputSchema,
+				response: {
+					201: server.statusEndSchema,
+				},
+			},
+		},
+		async (req: FastifyRequest<{ Body: IUserBody }>, reply: FastifyReply) =>
+			recoveryController.newPassword(req, reply)
+	);
+
 	server.delete(
 		"/log-out",
 		{
 			preHandler: [server.authByToken],
 			schema: {
-				headers:server.agentSchema,
+				headers: server.agentSchema,
 				response: {
-					201: {
-						msg: "Log out",
-					},
+					201: server.statusEndSchema,
 				},
 			},
 		},
